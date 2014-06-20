@@ -1,0 +1,25 @@
+#!/bin/csh
+
+set IN = ./output/thred10.test
+set OUT = ./output/thred10.test
+
+set PROJ = -JX6i/2i
+set COORD = -R1920/2014/-4/4
+
+
+psxy $IN $COORD $PROJ -Y5ii -K -P -B10:"Year":/2:"Average T anomaly when rainy (Nov1-Apr1), C@+o@+":WeSn -W4/0/0/0 >! $OUT.ps
+
+ set AVSWE = `awk '{print $2}' $IN | ./avg_col.pl`
+
+echo "1920 $AVSWE" >! avg_T  
+echo "2014 $AVSWE" >> avg_T
+
+psxy avg_T $COORD $PROJ -P -O -W4/0/0/255 >> $OUT.ps
+
+ps2raster $OUT.ps -F$OUT.png -Tg
+convert -trim +repage $OUT.png $OUT.png
+
+rm avg_T
+rm $OUT.ps
+
+#gs $OUT.ps.ps

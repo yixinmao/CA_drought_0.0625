@@ -1,0 +1,25 @@
+#!/bin/csh
+
+set IN = ./output/annual_swe
+set OUT = ./output/annual_swe_ts
+
+set PROJ = -JX6i/2i
+set COORD = -R1920/2014/0/55
+
+
+psxy $IN $COORD $PROJ -Y5ii -K -P -B10:"Year":/10:"Apr 1 SWE, km@+3@+":WeSn -W4/0/0/0 >! $OUT.ps
+
+set AVSWE = `awk '{print $2}' $IN | ./avg_col.pl`
+
+echo "1920 $AVSWE" >! avg_swe
+echo "2014 $AVSWE" >> avg_swe
+
+psxy avg_swe $COORD $PROJ -P -O -W4/0/0/255 >> $OUT.ps
+
+ps2raster $OUT.ps -F$OUT.png -Tg
+convert -trim +repage $OUT.png $OUT.png
+
+rm $OUT.ps
+rm avg_swe
+
+#gs $OUT.ps.ps
