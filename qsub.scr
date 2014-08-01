@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+#$ -cwd
+#$ -j y
+#$ -S /bin/csh
+#$ -q default.q
+#$ -M ymao@hydro.washington.edu
+#$ -N Temperature
+#$ -m abe
+
+# /raid2/ymao/other/CA_drought_0.0625/get_T_from_forcing_summer.py --latlonlist /raid2/ymao/other/CA_drought_0.0625/input/latlon.smaller --arealist /raid2/ymao/other/CA_drought_0.0625/input/area.list --ind /raid2/ymao/other/CA_drought_0.0625/run_vic/vic_forcing_1920-20140430 --outfTmax /raid2/ymao/other/CA_drought_0.0625/output/annual_summer_Tmax --outfTmin /raid2/ymao/other/CA_drought_0.0625/output/annual_summer_Tmin
+
+/raid2/ymao/other/CA_drought_0.0625/adjust_VIC_forcing_T.py

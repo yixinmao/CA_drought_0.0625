@@ -1,0 +1,17 @@
+latlon.smaller
+	The grid cells that we consider in California (1744 grid cells, within a box, with long-term Mar23 SWE > 10mm)
+
+tlon.topSWE174
+	174 grid cells with the highest long-term Mar23 SWE (top 10%, so 174 grid cells)
+
+soil.cali.all
+	VIC soil param file for the whole CA (from Ben Livneh);
+	the 22nd column is elevation [m]
+
+elev.smaller
+	[elevation(m)] [lat] [lon] 
+
+elev.smaller.sorted
+	[elevation(m)] [lat] [lon];
+	sorted by elevation
+

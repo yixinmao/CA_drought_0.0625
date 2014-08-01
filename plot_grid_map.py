@@ -9,13 +9,17 @@ import matplotlib
 ##############################
 # user defined
 ##############################
-infile = 'input/latlon.smaller'
-outfile = './output/grid_map.png'
+infile1 = 'input/latlon.smaller.higher_third'
+infile2 = 'input/latlon.smaller.middle_third'
+infile3 = 'input/latlon.smaller.lower_third'
+outfile = './output/grid_map_elevation_bands.png'
 
 ##############################
 # plot map
 ##############################
-latlon = np.loadtxt(infile)
+latlon1 = np.loadtxt(infile1)
+latlon2 = np.loadtxt(infile2)
+latlon3 = np.loadtxt(infile3)
 
 fig = plt.figure(figsize=(8,8))
 ax = plt.axes([0, 0.08, 1, 0.75])
@@ -29,9 +33,14 @@ m.fillcontinents(zorder=0, color='0.75')
 m.drawcountries()
 m.drawstates()
 
-x, y = m(latlon[:,1], latlon[:,0])
-
+x, y = m(latlon1[:,1], latlon1[:,0])
 m.scatter(x, y, s=10, c='b', marker='s', linewidths=0)
+
+x, y = m(latlon2[:,1], latlon2[:,0])
+m.scatter(x, y, s=10, c='r', marker='s', linewidths=0)
+
+x, y = m(latlon3[:,1], latlon3[:,0])
+m.scatter(x, y, s=10, c='g', marker='s', linewidths=0)
 
 fig.savefig(outfile, format='png')
 plt.show()
