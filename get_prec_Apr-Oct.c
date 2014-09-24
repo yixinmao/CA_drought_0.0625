@@ -12,7 +12,7 @@ double get_dist(double, double, double, double);
 double calc_area(float lat, float lon, float cellsize);
 int get_length(FILE *file);
 
-int main (int argc, char *argv[])  // total runoff from Apr to Jul for each year [km3]
+int main (int argc, char *argv[])   // accumulative prec (Apr - Oct) for each year [km3]
 {
   int i,j,nfiles,ndays;
   int syear,year,month,day,y;
@@ -20,7 +20,7 @@ int main (int argc, char *argv[])  // total runoff from Apr to Jul for each year
   double lat,lon,cellsize,area;
   double prec,evap,runoff,baseflow;
   double airT,sm1,sm2,sm3,swe;
-  double runoff_year[MAXY];
+  double prec_year[MAXY];
   char filename[MAXC];
   FILE *fpin,*fplist,*fpout;
 
@@ -35,7 +35,7 @@ int main (int argc, char *argv[])  // total runoff from Apr to Jul for each year
   nfiles=get_length(fplist);
   cellsize=atof(argv[2]);
   for(j=0;j<MAXY;j++){
-    runoff_year[j]=0;
+    prec_year[j]=0;
   }
   tot_area=0;
   for(i=0;i<nfiles;i++){
@@ -53,13 +53,10 @@ int main (int argc, char *argv[])  // total runoff from Apr to Jul for each year
       if(j==0)syear=year;
       fscanf(fpin,"%lf %lf %lf %lf",&prec,&evap,&runoff,&baseflow);
       fscanf(fpin,"%lf %lf %lf %lf %lf",&airT,&sm1,&sm2,&sm3,&swe);
-
-	  if(month>=12) {  // if Dec, add it to the next water year
-		runoff_year[year-syear+1]+=(runoff+baseflow)*area/1000/1000;
-	  }
-      else if(month<=3){  // if Jan-Mar, add it to this water year
-	runoff_year[year-syear]+=(runoff+baseflow)*area/1000/1000;
-      }
+	if(month>=4 && month<=10)  // if Apr-Oct, add it to this water year
+	{
+		prec_year[year-syear]+=prec*area/1000/1000;
+	}
     }
     fclose(fpin);
   }
@@ -68,8 +65,8 @@ int main (int argc, char *argv[])  // total runoff from Apr to Jul for each year
     printf("ERROR: can't open %s\n", argv[3]);
     exit(0);
   }
-  for(y=syear+1;y<=year;y++){   // only print water years (syear+1) - 2014
-    fprintf(fpout,"%d %.4f\n",y,runoff_year[y-syear]);
+  for(y=syear;y<=year-1;y++){    // only print water years 1920-2013
+    fprintf(fpout,"%d %.4f\n",y,prec_year[y-syear]);
   }
   fclose(fpout);
   printf("%.1f\n",tot_area);

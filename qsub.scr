@@ -4,10 +4,10 @@
 #$ -j y
 #$ -S /bin/csh
 #$ -q default.q
-#$ -M ymao@hydro.washington.edu
-#$ -N Temperature
-#$ -m abe
 
-# /raid2/ymao/other/CA_drought_0.0625/get_T_from_forcing_summer.py --latlonlist /raid2/ymao/other/CA_drought_0.0625/input/latlon.smaller --arealist /raid2/ymao/other/CA_drought_0.0625/input/area.list --ind /raid2/ymao/other/CA_drought_0.0625/run_vic/vic_forcing_1920-20140430 --outfTmax /raid2/ymao/other/CA_drought_0.0625/output/annual_summer_Tmax --outfTmin /raid2/ymao/other/CA_drought_0.0625/output/annual_summer_Tmin
+#./adjust_VIC_forcing_T_P.py
 
-/raid2/ymao/other/CA_drought_0.0625/adjust_VIC_forcing_T.py
+/raid2/ymao/other/CA_drought_0.0625/get_sm_Jul31 /raid2/ymao/other/CA_drought_0.0625/input/latlon.smaller 0.0625 /raid2/ymao/other/CA_drought_0.0625/output/sm_Jul31_adjustT_pivot2014
+
+#./get_runoff_CT.py --latlonlist ./input/latlon.smaller --arealist ./input/area.list --ind /raid2/ymao/other/CA_drought_0.0625/run_vic/model_output/fluxes_1920_20140731_old2014_adjustT_P_pivot2014 --outf ./output/runoff_CT_adjustT_P_pivot2014 --outmap /raid2/ymao/other/CA_drought_0.0625/output/runoff_CT_trend_map2.png
+

@@ -11,7 +11,7 @@ MAXC = 500
 cellsize = 0.0625
 
 start_date = dt.datetime(year=1920, month=1, day=1)
-end_date = dt.datetime(year=2014, month=4, day=30)
+end_date = dt.datetime(year=2014, month=7, day=31)
 
 duration = end_date - start_date
 nday = duration.days + 1
@@ -74,11 +74,11 @@ print nday_year
 
 ############################## print out results ################################
 f = open(args.outfTmax, 'w')
-for y in range(1, nyear):  # only print out 1921-2004
+for y in range(1, nyear):  # only print out 1921-2014
 	f.write("%4d %.4f\n" %(start_year+y, Tmax_year[y]))
 f.close()
 f = open(args.outfTmin, 'w')
-for y in range(1, nyear):  # only print out 1921-2004
+for y in range(1, nyear):  # only print out 1921-2014
 	f.write("%4d %.4f\n" %(start_year+y, Tmin_year[y]))
 f.close()
 

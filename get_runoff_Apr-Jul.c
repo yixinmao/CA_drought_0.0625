@@ -53,11 +53,7 @@ int main (int argc, char *argv[])  // total runoff from Apr to Jul for each year
       if(j==0)syear=year;
       fscanf(fpin,"%lf %lf %lf %lf",&prec,&evap,&runoff,&baseflow);
       fscanf(fpin,"%lf %lf %lf %lf %lf",&airT,&sm1,&sm2,&sm3,&swe);
-
-	  if(month>=12) {  // if Dec, add it to the next water year
-		runoff_year[year-syear+1]+=(runoff+baseflow)*area/1000/1000;
-	  }
-      else if(month<=3){  // if Jan-Mar, add it to this water year
+      if(month>=4 && month<=7){
 	runoff_year[year-syear]+=(runoff+baseflow)*area/1000/1000;
       }
     }
@@ -68,7 +64,7 @@ int main (int argc, char *argv[])  // total runoff from Apr to Jul for each year
     printf("ERROR: can't open %s\n", argv[3]);
     exit(0);
   }
-  for(y=syear+1;y<=year;y++){   // only print water years (syear+1) - 2014
+  for(y=syear;y<=year;y++){   // print out 1920-2014
     fprintf(fpout,"%d %.4f\n",y,runoff_year[y-syear]);
   }
   fclose(fpout);
