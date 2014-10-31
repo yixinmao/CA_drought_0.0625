@@ -1,5 +1,9 @@
 #!/usr/local/bin/python
 
+#########################################################################
+################## plot Apr-Jul fractional flow map #####################
+#########################################################################
+
 import numpy as np
 import datetime as dt
 import argparse
@@ -25,35 +29,25 @@ end_year = end_date.year
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--latlonlist", help="Latlon list")
-parser.add_argument("--arealist", help="area list [lat; lon; area]")
 parser.add_argument("--ind", help="input VIC output files directory")
-parser.add_argument("--outf", help="output file")
 parser.add_argument("--outmap", help="output map file")
 args = parser.parse_args()
 
 latlonlist = np.loadtxt(args.latlonlist)
-arealist = np.loadtxt(args.arealist)
 nfile = np.shape(latlonlist)[0]
 
 ############################# load data and calculate #######################
-tot_area = 0
-runoff_CT_ave = np.zeros(nyear)
-trend_CT = np.empty(nfile)
+trend_runoff_frac_Apr_Jul = np.empty(nfile)
 for i in range(nfile):
 	print 'Grid cell %d' %(i+1)
-	if arealist[i,0]!=latlonlist[i,0] or arealist[i,1]!=latlonlist[i,1]:
-		print "Error: area list does not match with latlon list!"
-		exit()
-	area = arealist[i,2]
-	tot_area = tot_area + area
 
 	# load data for this grid cell
 	filename = 'fluxes_%.5f_%.5f' %(latlonlist[i,0], latlonlist[i,1])
 	data = np.loadtxt('%s/%s' %(args.ind, filename))  # year; month; day; prec; evap; runoff; baseflow; airT; sm1; sm2; sm3; swe
 
 	# calculation
-	runoff_CT_year = np.zeros(nyear)
-	runoff_year = np.zeros(nyear)
+	runoff_whole_year = np.zeros(nyear)
+	runoff_Apr_Jul = np.zeros(nyear)
 	for t in range(nday):
 		date = start_date + dt.timedelta(days=t)
 		year = date.year
@@ -64,27 +58,21 @@ for i in range(nfile):
 		baseflow = data[t,6]
 
 		if month>=10:  # if Oct-Dec, add it to the next water year
-			ti = (date - dt.datetime(year=year, month=11, day=1)).days + 1 # time in days from the beginning of the water year, start from 1
-			runoff_CT_year[year_ind+1] = runoff_CT_year[year_ind+1] + (runoff+baseflow)*ti
-			runoff_year[year_ind+1] = runoff_year[year_ind+1] + (runoff+baseflow)
+			runoff_whole_year[year_ind+1] = runoff_whole_year[year_ind+1] + (runoff+baseflow)
 		elif month<=9:  # if Jan-Sep, add it to this water year
-			ti = (date - dt.datetime(year=year-1, month=10, day=1)).days + 1 # time in days from the beginning of the water year, start from 1
-			runoff_CT_year[year_ind] = runoff_CT_year[year_ind] + (runoff+baseflow)*ti
-			runoff_year[year_ind] = runoff_year[year_ind] + (runoff+baseflow)
+			runoff_whole_year[year_ind] = runoff_whole_year[year_ind] + (runoff+baseflow)
+		if month>=4 and month<=7:  # add it to this water year
+			runoff_Apr_Jul[year_ind] = runoff_Apr_Jul[year_ind] + (runoff+baseflow)
 
-	for y in range(nyear):
-		runoff_CT_year[y] = runoff_CT_year[y] / runoff_year[y]  # unit: day
-		runoff_CT_ave[y] = runoff_CT_ave[y] + runoff_CT_year[y] * area
+	runoff_frac_Apr_Jul = runoff_Apr_Jul / runoff_whole_year
 
-	# calculate linear trend of CT for this grid cell
+	# calculate linear trend of fractional flow for this grid cell (only consider 1921-2013 water years)
 	x = range(start_year+1, end_year)
 	x = np.asarray(x).T
 	A = np.array([x, np.ones(np.shape(x)[0])])
-	y = runoff_CT_year[1:nyear-1]
+	y = runoff_frac_Apr_Jul[1:nyear-1]
 	w = np.linalg.lstsq(A.T, y)[0]
-	trend_CT[i] = w[0]  # day/year
-
-runoff_CT_ave = runoff_CT_ave / tot_area
+	trend_runoff_frac_Apr_Jul[i] = w[0]  # year-1
 
 ############################## plot trend map ##################################
 fig = plt.figure(figsize=(8,8))
@@ -100,20 +88,14 @@ m.drawcountries()
 m.drawstates()
 
 x, y = m(latlonlist[:,1], latlonlist[:,0])
-data = trend_CT * (nyear-2)  # T change [deg C]
-cs = plt.scatter(x[0:nfile], y[0:nfile], s=10, c=data, cmap='RdBu', vmax=10, vmin=-10, marker='s', linewidth=0)
+data = trend_runoff_frac_Apr_Jul * (nyear-2) * 100  # fractional flow change [%/(nyear-2)]
+cs = plt.scatter(x[0:nfile], y[0:nfile], s=10, c=data, cmap='RdBu', vmax=20, vmin=-20, marker='s', linewidth=0)
 cbar = plt.colorbar(cs)
-cbar.set_label('CT change (day)')
-plt.text(0.5, 1.1, "Runoff CT change over 1921-2013", \
+cbar.set_label('Fractional flow change (%/93 years)')
+plt.text(0.5, 1.1, "Apr-Jul fractional flow over 1921-2013", \
              horizontalalignment='center', \
              fontsize=16, transform = ax.transAxes)
 fig.savefig(args.outmap, format='png')
-
-############################### print out results ################################
-#f = open(args.outf, 'w')
-#for y in range(1, nyear-1):  # only print out 1921-2013
-#	f.write("%4d %.4f\n" %(start_year+y, runoff_CT_ave[y]))
-#f.close()
 
 
 

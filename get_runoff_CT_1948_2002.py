@@ -23,6 +23,8 @@ nyear = (end_date.year - start_date.year) + 1
 start_year = start_date.year
 end_year = end_date.year
 
+nyear_plot = 55
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--latlonlist", help="Latlon list")
 parser.add_argument("--arealist", help="area list [lat; lon; area]")
@@ -76,11 +78,11 @@ for i in range(nfile):
 		runoff_CT_year[y] = runoff_CT_year[y] / runoff_year[y]  # unit: day
 		runoff_CT_ave[y] = runoff_CT_ave[y] + runoff_CT_year[y] * area
 
-	# calculate linear trend of CT for this grid cell
-	x = range(start_year+1, end_year)
+	# calculate linear trend of CT for this grid cell (only consider 1948-2002)
+	x = range(1948, 2003)
 	x = np.asarray(x).T
 	A = np.array([x, np.ones(np.shape(x)[0])])
-	y = runoff_CT_year[1:nyear-1]
+	y = runoff_CT_year[28:83]
 	w = np.linalg.lstsq(A.T, y)[0]
 	trend_CT[i] = w[0]  # day/year
 
@@ -100,11 +102,11 @@ m.drawcountries()
 m.drawstates()
 
 x, y = m(latlonlist[:,1], latlonlist[:,0])
-data = trend_CT * (nyear-2)  # T change [deg C]
+data = trend_CT * nyear_plot  # T change [deg C]
 cs = plt.scatter(x[0:nfile], y[0:nfile], s=10, c=data, cmap='RdBu', vmax=10, vmin=-10, marker='s', linewidth=0)
 cbar = plt.colorbar(cs)
 cbar.set_label('CT change (day)')
-plt.text(0.5, 1.1, "Runoff CT change over 1921-2013", \
+plt.text(0.5, 1.1, "Runoff CT change over 1948-2002", \
              horizontalalignment='center', \
              fontsize=16, transform = ax.transAxes)
 fig.savefig(args.outmap, format='png')

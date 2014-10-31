@@ -3,11 +3,15 @@
 #$ -cwd
 #$ -j y
 #$ -S /bin/csh
-#$ -q default.q
+#$ -q default.q@compute-0-0
 
-#./adjust_VIC_forcing_T_P.py
+./adjust_VIC_forcing_T_sens.py
 
-/raid2/ymao/other/CA_drought_0.0625/get_sm_Jul31 /raid2/ymao/other/CA_drought_0.0625/input/latlon.smaller 0.0625 /raid2/ymao/other/CA_drought_0.0625/output/sm_Jul31_adjustT_pivot2014
+#/raid2/ymao/other/CA_drought_0.0625/get_sm_Jul31 /raid2/ymao/other/CA_drought_0.0625/input/latlon.smaller 0.0625 /raid2/ymao/other/CA_drought_0.0625/output/sm_Jul31_adjustT_pivot2014
 
-#./get_runoff_CT.py --latlonlist ./input/latlon.smaller --arealist ./input/area.list --ind /raid2/ymao/other/CA_drought_0.0625/run_vic/model_output/fluxes_1920_20140731_old2014_adjustT_P_pivot2014 --outf ./output/runoff_CT_adjustT_P_pivot2014 --outmap /raid2/ymao/other/CA_drought_0.0625/output/runoff_CT_trend_map2.png
+#./get_runoff_CT_1948_2002.py --latlonlist ./input/latlon.smaller --arealist ./input/area.list --ind /raid2/ymao/other/CA_drought_0.0625/run_vic/model_output/fluxes_1920_20140731_old2014 --outf ./output/asdf --outmap /raid2/ymao/other/CA_drought_0.0625/output/runoff_CT_trend_map_1948_2002.png
+
+#./plot_runoff_frac_Apr_Jul_1948_2002.py --latlonlist /raid2/ymao/other/CA_drought_0.0625/input/latlon.smaller --ind /raid2/ymao/other/CA_drought_0.0625/run_vic/model_output/fluxes_1920_20140731_old2014 --outmap /raid2/ymao/other/CA_drought_0.0625/output/runoff_Apr_Jul_frac_trend_map_1948_2002.png
+
+#./plot_swe_Apr1_trend_map.py --latlonlist /raid2/ymao/other/CA_drought_0.0625/input/latlon.smaller --ind /raid2/ymao/other/CA_drought_0.0625/run_vic/model_output/fluxes_1920_20140731_old2014 --outmap /raid2/ymao/other/CA_drought_0.0625/output/swe_Apr1_trend_map_1920_2014_in_percent.png
 

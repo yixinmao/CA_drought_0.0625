@@ -43,7 +43,7 @@ int main (int argc, char *argv[])   // accumulative prec (Nov - Mar) for each ye
     fscanf(fplist,"%lf %lf",&lat,&lon);
     area=calc_area(lat,lon,cellsize);
     tot_area+=area;
-    sprintf(filename,"/raid2/ymao/other/CA_drought_0.0625/run_vic/model_output/fluxes_1920_20140731_old2014_adjustT_P_pivot2014/fluxes_%.5f_%.5f",lat,lon);
+    sprintf(filename,"/raid2/ymao/other/CA_drought_0.0625/run_vic/model_output/fluxes_1920_20140930_old2014/fluxes_%.5f_%.5f",lat,lon);
     if((fpin = fopen(filename,"r"))==NULL){
       printf("ERROR: can't open %s\n", filename);
       exit(0);
