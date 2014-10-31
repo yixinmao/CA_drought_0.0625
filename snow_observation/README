@@ -1,0 +1,21 @@
+plot_snow_std_location.py
+	script to plot available data sites on a map
+
+snow_std_latlon
+	a list of latlon of available data sites
+
+snow_data_from_Darrin
+	SWE2014:
+		Data currently available on CDEC and NRCS websites;
+		CA_DEC: snow course data from CDEC;
+		NRCS: snow course and SNOTEL data from NRCS
+	ESTSNOTELSWE:
+		Data available on old NRCS websites (before 2013), different from what is available on the website now;
+		snow course and SNOTEL data from NRCS
+	NOTE: format of files in SWE2014/CA_DEC (CATXTFiles.txt contains the list of 226 file names):
+		First line: site name;
+		Second line: abbreviation of site name;
+		Third line: [elevation(feet)] [lat] [lon (note that there is no negative sign!)]
+		Fourth line: Course--Year----Month---SWE-Meas.Date---Name
+		From fifth line: data
+
