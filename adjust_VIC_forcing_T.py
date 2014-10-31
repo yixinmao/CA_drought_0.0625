@@ -1,5 +1,9 @@
 #!/usr/local/bin/python
 
+###############################################################
+######## remove linear trend in T for each grid cell ##########
+###############################################################
+
 import numpy as np
 import datetime as dt
 import matplotlib as mpl
@@ -8,13 +12,13 @@ from mpl_toolkits.basemap import Basemap, cm
 import matplotlib.pyplot as plt
 
 ######################## user defined ############################
-ori_vic_forcing_path = '/home/raid2/ymao/other/CA_drought_0.0625/run_vic/vic_forcing_1920-20140731'
+ori_vic_forcing_path = '/home/raid2/ymao/other/CA_drought_0.0625/run_vic/vic_forcing_1920-20140930'
 latlonlist_path = '/raid2/ymao/other/CA_drought_0.0625/input/latlon.smaller'
 output_map_dir = '/raid2/ymao/other/CA_drought_0.0625/output'
-output_new_forcing_dir = '/raid2/ymao/other/CA_drought_0.0625/run_vic/vic_forcing_detrend_T_pivot1920_1920-Jul2014'
+output_new_forcing_dir = '/raid2/ymao/other/CA_drought_0.0625/run_vic/vic_forcing_detrend_T_pivot2014_1920-Sep2014'
 
 start_date = dt.datetime(year=1920, month=1, day=1)
-end_date = dt.datetime(year=2014, month=7, day=31)
+end_date = dt.datetime(year=2014, month=9, day=30)
 
 nday = (end_date-start_date).days + 1
 nyear = end_date.year-start_date.year + 1
@@ -105,9 +109,9 @@ for i in range(nfile):
 			Tmin_year[year-start_year] = Tmin_year[year-start_year] + Tmin 
 			nday_year[year-start_year] = nday_year[year-start_year] + 1
 	Tmax_year = Tmax_year / nday_year
-	Tmax_year = (np.array([np.arange(start_year+1,end_year+1), Tmax_year[1:nyear]])).T  # only analyze 1921-2014 for winter [year; T]
+	Tmax_year = (np.array([np.arange(start_year,end_year), Tmax_year[0:nyear-1]])).T  # only analyze 1920-2013 for winter [year; T]
 	Tmin_year = Tmin_year / nday_year
-	Tmin_year = (np.array([np.arange(start_year+1,end_year+1), Tmin_year[1:nyear]])).T  # only analyze 1921-2014 for winter [year; T]
+	Tmin_year = (np.array([np.arange(start_year,end_year), Tmin_year[0:nyear-1]])).T  # only analyze 1920-2013 for winter [year; T]
 	# calculate trend using linear regression
 	x = Tmax_year[:,0]
 	A = np.array([x, np.ones(np.shape(x)[0])])
