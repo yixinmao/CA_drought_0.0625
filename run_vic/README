@@ -1,0 +1,46 @@
+datafiles.cali1, datafiles.cali2 
+	data file lists in cali1 and cali2 in drought monitoring system
+
+vic_forcing_updated_1920-2013
+	VIC forcing with updated index station data for 1920-2013
+
+vic_forcing_old_20110101-20140430
+	VIC forcing with old index station data for 20110101-20140430
+
+vic_forcing_1920-20140430
+	1920-2013: with updated index stations
+	20140101-20140430: with old index stations
+
+vic_forcing_old_20140501-20140731
+	VIC forcing with old index stationdata for 20140501-20140731
+	(May data is from spinup_nearRT; June and July data is from curr_spinup)
+
+vic_forcing_1920-20140731
+	1920-2013: with updated index stations
+	20140101-20140731: with old index stations (cat vic_forcing_1920-20140430 and vic_forcing_old_20140501-20140731)
+
+vic_forcing_old_20140501-20140930
+	VIC forcing with old index stationdata for 20140501-20140930
+	(0501-0731: from sprinup_nearRT; 0801-0920: from curr_spinup)
+
+=====================================================================================
+soil.cali
+	soil file for whole CA
+
+soil.cali.smaller
+	soil file only for our study region (1744 grid cells)
+
+input.cali
+	global file (run 1920-2013, can be used as a template)
+
+ten.first.1_19191231
+	initial state file for cali1 region
+
+ten.first.2_19191231
+	initial state file for cali2 region
+
+ten.first.whole_19191231
+	initial state file for whole CA region (cat ten.first.1_19191231 ten.first.2_19191231)
+
+snow.band.smaller
+	snow band file only for our study region (1744 grid cells)

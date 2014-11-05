@@ -15,3 +15,6 @@ elev.smaller.sorted
 	[elevation(m)] [lat] [lon];
 	sorted by elevation
 
+cellnum_latlon_list
+	cellnum and latlon match file (cellnum; lat; lon)
+	for our study region only (1744 grid cells)
