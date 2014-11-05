@@ -40,7 +40,9 @@ while 1:
 		break
 	snow_obs_list.append(line)
 f.close()
-nobs = len(snow_obs_list)
+nobs_orig = len(snow_obs_list)  # number of all sites
+
+nobs_orig = 5
 
 ###################################################################
 ################### load snow obs data ############################
@@ -48,7 +50,7 @@ nobs = len(snow_obs_list)
 print 'Loading snow obs data...'
 data_obs = [] # [[site name, abbr, elev(ft), lat, lon], 
               # np.array(year, month, SWE(inch))]
-for i in range(nobs):
+for i in range(nobs_orig):
 	data_obs.append([])
 	f = open('%s/%s' %(snow_obs_dir, snow_obs_list[i]))
 	data_obs[i].append([])
@@ -69,9 +71,9 @@ for i in range(nobs):
              # np.array(year, month, SWE(inch)),
              # [lat_grid, lon_grid],
              # np.array from vic output (year, month, day, SWE(mm), ariT(degC))]
-             #        (if grid cell not in the study domain, -1)
+             #        (if grid cell not in the study domain, delete it)
 print 'Loading VIC output...'
-for i in range(nobs):
+for i in range(nobs_orig):
 	print 'Loading grid cell %d...' %(i+1)
 	# find grid cell the site falls in
 	lat = data_obs[i][0][3]
@@ -86,6 +88,11 @@ for i in range(nobs):
 	else:
 		data_obs[i].append(np.loadtxt('%s/fluxes_%.5f_%.5f' %(vic_output_dir, lat_grid, lon_grid), usecols=(0,1,2,11,7)))
 
+for i in range(nobs_orig-1, -1, -1):
+	if type(data_obs[i][3])==int:
+		del data_obs[i]
+nobs = len(data_obs)  # number of sites falling in our study domain
+
 ###################################################################
 ################# check grid cells with multiple sites ############
 ###################################################################
@@ -94,11 +101,10 @@ for i in range(nobs):
 ####### calculate average Apr 1 SWE in conrresponding years #######
 ###################################################################
 data_avg = [] # [[site name, abbr, elev(ft), lat, lon], 
-             # mean obs Apr 1 SWE (mm)
-             # [lat_grid, lon_grid],
-             # mean Apr 1 SWE (mm) in corresponding years
-             #        (if grid cell not in the study domain, -1)
-             # mean Nov-Mar T (degC) in corresponding years
+              # mean obs Apr 1 SWE (mm)
+              # [lat_grid, lon_grid],
+              # mean Apr 1 SWE (mm) from VIC output in corresponding years
+              # mean Nov-Mar T (degC) in corresponding years
 
 for i in range(nobs):
 	data_avg.append([])
@@ -115,35 +121,122 @@ for i in range(nobs):
 	data_avg[i].append(swe_obs_avg)
 
 	data_avg[i].append(data_obs[i][2])
+
 	# calculate mean Apr 1 SWE from VIC in corresponding years
-	if type(data_obs[i][3])==int: # if this grid cell not available
-		data_avg[i].append(-1)
-	else:
-		swe_vic_avg = 0
-		for year in years:
-			month = 4
-			day = 1
-			date_ind = (dt.datetime(year=year, month=month, day=day)-start_date).days # index starts from 0
-			swe = data_obs[i][3][date_ind, 3]
-			swe_vic_avg = swe_vic_avg + swe
-		swe_vic_avg = swe_vic_avg / len(years)
-		data_avg[i].append(swe_vic_avg)
+	swe_vic_avg = 0
+	for year in years:
+		month = 4
+		day = 1
+		date_ind = (dt.datetime(year=year, month=month, day=day)-start_date).days # index starts from 0
+		swe = data_obs[i][3][date_ind, 3]
+		swe_vic_avg = swe_vic_avg + swe
+	swe_vic_avg = swe_vic_avg / len(years)
+	data_avg[i].append(swe_vic_avg)
+
+	# calculate mean Nov-Mar T from VIC in corresponding years
+	T_winter_avg = 0
+	count = 0
+	for year in years:
+		date1 = dt.datetime(year=year-1, month=11, day=1)
+		date2 = dt.datetime(year=year, month=3, day=31)
+		day_count = (date2-date1).days + 1
+		for date in (date1+dt.timedelta(n) for n in range(day_count)): # loop over all days in Nov-Mar in this wate year
+			date_ind = (date-start_date).days # index starts from 0
+			T = data_obs[i][3][date_ind, 4]
+			T_winter_avg = T_winter_avg + T
+			count = count + 1
+	T_winter_avg = T_winter_avg/count
+	data_avg[i].append(T_winter_avg)
 
 ###################################################################
 ###################### making scatter plot  #######################
 ###################################################################
-fig = plt.figure()
-for i in range(nobs):
-	if data_avg[i][3]!=-1:
-		plt.plot(data_avg[i][1], data_avg[i][3], 'bo')
-plt.plot(np.arange(0,2000), np.arange(0,2000), 'k--')
-plt.xlabel('Observed Apr 1 SWE (mm)', fontsize=16)
-plt.ylabel('VIC-simulated Apr 1 SWE (mm)', fontsize=16)
-plt.xlim(0,2000)
-plt.ylim(0,2000)
-plt.axis('scaled')
-fig.savefig('%s/snow_obs_scatter.png' %output_dir, format='png')
+#fig = plt.figure()
+#for i in range(nobs):
+#	plt.plot(data_avg[i][1], data_avg[i][3], 'bo')
+#plt.plot(np.arange(0,2000), np.arange(0,2000), 'k--')
+#plt.xlabel('Observed Apr 1 SWE (mm)', fontsize=16)
+#plt.ylabel('VIC-simulated Apr 1 SWE (mm)', fontsize=16)
+#plt.xlim(0,2000)
+#plt.ylim(0,2000)
+#plt.axis('scaled')
+#fig.savefig('%s/snow_obs_scatter.png' %output_dir, format='png')
 
 ###################################################################
-###################### making binned plot  ########################
+####### making binned plot (binned by every 1 K winter T) #########
 ###################################################################
+# put SWE data into T bins
+T_winter_avg = np.asarray([row[4] for row in data_avg]) # deg C
+swe_obs_avg = np.asarray([row[1] for row in data_avg]) # mm
+swe_vic_avg = np.asarray([row[3] for row in data_avg]) # mm
+T_winter_avg_bin = np.around(T_winter_avg).astype(int) # rounded T
+T_min_bin = np.min(T_winter_avg_bin)
+T_max_bin = np.max(T_winter_avg_bin)
+nbin = T_max_bin - T_min_bin + 1
+swe_obs_binned = []
+swe_vic_binned = []
+# binned data structure: [[swe1, swe2, swe3, ...] -> Tmin
+#                         [swe1, swe2, swe3, ...] -> Tmin+1]
+#                         ...
+#                         [swe1, swe2, ...] > Tmax ]
+for i in range(nbin):
+	swe_obs_binned.append([])
+	swe_vic_binned.append([])
+for i in range(nobs):
+	Tind = T_winter_avg_bin[i] - T_min_bin  # index starts from 0
+	swe_obs_binned[Tind].append(swe_obs_avg[i])
+	swe_vic_binned[Tind].append(swe_vic_avg[i])
+
+# calculate statistics (for each bin, a dict: [n (number of data)] [min] [max] [10th] [90th] [median])
+bin_swe_stat_obs = []
+bin_swe_stat_vic = []
+for i in range(nbin):
+	# obs
+	bin_swe_stat_obs.append({})
+	bin_swe_stat_obs[i]['n'] = len(swe_obs_binned[i])  # number of data
+	if bin_swe_stat_obs[i]['n']>=1:
+		bin_swe_stat_obs[i]['min'] = np.min(swe_obs_binned[i]) # min
+		bin_swe_stat_obs[i]['max'] = np.max(swe_obs_binned[i]) # max
+		bin_swe_stat_obs[i]['10th'] = np.percentile(swe_obs_binned[i], 10) # 10th
+		bin_swe_stat_obs[i]['90th'] = np.percentile(swe_obs_binned[i], 90) # 90th
+		bin_swe_stat_obs[i]['median'] = np.median(swe_obs_binned[i]) # median
+	# vic
+	bin_swe_stat_vic.append({})
+	bin_swe_stat_vic[i]['n'] = len(swe_vic_binned[i])  # number of data
+	if bin_swe_stat_vic[i]['n']>=1:
+		bin_swe_stat_vic[i]['min'] = np.min(swe_vic_binned[i]) # min
+		bin_swe_stat_vic[i]['max'] = np.max(swe_vic_binned[i]) # max
+		bin_swe_stat_vic[i]['10th'] = np.percentile(swe_vic_binned[i], 10) # 10th
+		bin_swe_stat_vic[i]['90th'] = np.percentile(swe_vic_binned[i], 90) # 90th
+		bin_swe_stat_vic[i]['median'] = np.median(swe_vic_binned[i]) # median
+
+fig = plt.figure()
+for i in range(nbin):
+	# vic 
+	if bin_swe_stat_vic[i]['n']>=1:
+		plt.plot([bin_swe_stat_vic[i]['min'], bin_swe_stat_vic[i]['max']], [T_min_bin+i,T_min_bin+i], 'r--')
+		if bin_swe_stat_vic[i]['n']>=10:
+			plt.plot([bin_swe_stat_vic[i]['10th'], bin_swe_stat_vic[i]['90th']], [T_min_bin+i,T_min_bin+i], 'r-')
+			plt.plot([bin_swe_stat_vic[i]['10th'], bin_swe_stat_vic[i]['90th']], [T_min_bin+i,T_min_bin+i], 'r+')
+		plt.plot(bin_swe_stat_vic[i]['median'], T_min_bin+i, 'ro')
+	# obs
+	if bin_swe_stat_obs[i]['n']>=1:
+		plt.plot([bin_swe_stat_obs[i]['min'], bin_swe_stat_obs[i]['max']], [T_min_bin+i-0.2,T_min_bin+i-0.2], 'b--')
+		if bin_swe_stat_obs[i]['n']>=10:
+			plt.plot([bin_swe_stat_obs[i]['10th'], bin_swe_stat_obs[i]['90th']], [T_min_bin+i-0.2,T_min_bin+i-0.2], 'b-')
+			plt.plot([bin_swe_stat_obs[i]['10th'], bin_swe_stat_obs[i]['90th']], [T_min_bin+i-0.2,T_min_bin+i-0.2], 'b+')
+		plt.plot(bin_swe_stat_obs[i]['median'], T_min_bin+i-0.2, 'bo')
+
+plt.plot(bin_swe_stat_vic[0]['median'], T_min_bin, 'ro', label='VIC simulated')
+plt.plot(bin_swe_stat_obs[0]['median'], T_min_bin-0.2, 'bo', label='Observed')
+
+plt.legend(loc='upper right', fontsize=16)
+plt.ylim(T_min_bin-1, T_max_bin+1)
+plt.xlabel('Apr 1 SWE (mm)', fontsize=16)
+plt.ylabel('Nov-Mar winter temperature ($^0$C)', fontsize=16)
+#fig.savefig('%s/swe_obs_binned.png' %output_dir, format='png')
+
+
+
+
+
