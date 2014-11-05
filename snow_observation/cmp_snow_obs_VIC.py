@@ -42,7 +42,6 @@ while 1:
 f.close()
 nobs_orig = len(snow_obs_list)  # number of all sites
 
-nobs_orig = 5
 
 ###################################################################
 ################### load snow obs data ############################
@@ -219,6 +218,8 @@ for i in range(nbin):
 			plt.plot([bin_swe_stat_vic[i]['10th'], bin_swe_stat_vic[i]['90th']], [T_min_bin+i,T_min_bin+i], 'r-')
 			plt.plot([bin_swe_stat_vic[i]['10th'], bin_swe_stat_vic[i]['90th']], [T_min_bin+i,T_min_bin+i], 'r+')
 		plt.plot(bin_swe_stat_vic[i]['median'], T_min_bin+i, 'ro')
+	if i>=1 and bin_swe_stat_vic[i]['n']>=1 and bin_swe_stat_vic[i-1]['n']>=1: # connect median values
+		plt.plot([bin_swe_stat_vic[i-1]['median'], bin_swe_stat_vic[i]['median']], [T_min_bin+i-1,T_min_bin+i], 'r-')
 	# obs
 	if bin_swe_stat_obs[i]['n']>=1:
 		plt.plot([bin_swe_stat_obs[i]['min'], bin_swe_stat_obs[i]['max']], [T_min_bin+i-0.2,T_min_bin+i-0.2], 'b--')
@@ -226,6 +227,8 @@ for i in range(nbin):
 			plt.plot([bin_swe_stat_obs[i]['10th'], bin_swe_stat_obs[i]['90th']], [T_min_bin+i-0.2,T_min_bin+i-0.2], 'b-')
 			plt.plot([bin_swe_stat_obs[i]['10th'], bin_swe_stat_obs[i]['90th']], [T_min_bin+i-0.2,T_min_bin+i-0.2], 'b+')
 		plt.plot(bin_swe_stat_obs[i]['median'], T_min_bin+i-0.2, 'bo')
+	if i>=1 and bin_swe_stat_obs[i]['n']>=1 and bin_swe_stat_obs[i-1]['n']>=1: # connect median values
+		plt.plot([bin_swe_stat_obs[i-1]['median'], bin_swe_stat_obs[i]['median']], [T_min_bin+i-0.2-1,T_min_bin-0.2+i], 'b-')
 
 plt.plot(bin_swe_stat_vic[0]['median'], T_min_bin, 'ro', label='VIC simulated')
 plt.plot(bin_swe_stat_obs[0]['median'], T_min_bin-0.2, 'bo', label='Observed')
@@ -234,7 +237,7 @@ plt.legend(loc='upper right', fontsize=16)
 plt.ylim(T_min_bin-1, T_max_bin+1)
 plt.xlabel('Apr 1 SWE (mm)', fontsize=16)
 plt.ylabel('Nov-Mar winter temperature ($^0$C)', fontsize=16)
-#fig.savefig('%s/swe_obs_binned.png' %output_dir, format='png')
+fig.savefig('%s/swe_obs_binned.png' %output_dir, format='png')
 
 
 
