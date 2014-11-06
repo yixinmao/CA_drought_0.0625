@@ -17,5 +17,5 @@ snow_data_from_Darrin
 		Second line: abbreviation of site name;
 		Third line: [elevation(feet)] [lat] [lon (note that there is no negative sign!)]
 		Fourth line: Course--Year----Month---SWE-Meas.Date---Name
-		From fifth line: data
+		From fifth line: data (SWE unit: inch)
 
