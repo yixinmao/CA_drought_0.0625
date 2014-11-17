@@ -1,6 +1,13 @@
 plot_snow_std_location.py
 	script to plot available data sites on a map
 
+cmp_snow_obs_VIC.py
+	plot to compare snow obs and VIC simulation results
+
+cmp_snow_obs_VIC_snowband.py
+	plot to compare snow obs and VIC simulation results
+	select VIC output at snowbands
+
 snow_std_latlon
 	a list of latlon of available data sites
 
